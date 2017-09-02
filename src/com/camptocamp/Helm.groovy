@@ -116,7 +116,7 @@ def containerBuildPub(Map args) {
     }
 }
 
-def getContainerTags(config, Map tags = [:]) {
+def getContainerTags(Map tags = [:]) {
 
     println "getting list of tags for container"
     def String commit_tag

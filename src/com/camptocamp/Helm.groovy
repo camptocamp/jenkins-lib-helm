@@ -4,14 +4,14 @@ package com.camptocamp;
 def kubectlTest() {
     // Test that kubectl can correctly communication with the Kubernetes API
     println "checking kubectl connnectivity to the API"
-    sh "kubectl get nodes"
+    sh "kubectl status"
 
 }
 
 def ocTest() {
     // Test that oc can correctly communication with the openshift API
     println "checking oc connnectivity to the API"
-    sh "oc get nodes"
+    sh "oc status"
 
 }
 

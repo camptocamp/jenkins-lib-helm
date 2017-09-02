@@ -34,7 +34,7 @@ def helmConfig() {
     println "initiliazing helm client"
     sh "helm init --client-only"
     println "checking client/server version"
-    sh "HELM_HOST=tiller.kube-system.svc:44134 helm version"
+    sh "helm version"
     ocLogout()
 }
 

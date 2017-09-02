@@ -1,19 +1,25 @@
 #!/usr/bin/groovy
 package com.camptocamp;
 
-def kubectlTest() {
-    // Test that kubectl can correctly communication with the Kubernetes API
-    println "checking kubectl connnectivity to the API"
-    sh "kubectl status"
+def ocLogin() {
+    println "using helm as user $HELM_USER"
+    sh "oc login --insecure-skip-tls-verify --token $HELM_TOKEN https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT"
+}
 
+def ocLogout() {
+    sh "oc logout"
+    // remove config
+    sh "rm -rf ~/.kube/config"
 }
 
 def ocTest() {
     // Test that oc can correctly communication with the openshift API
     println "checking oc connnectivity to the API"
-    sh "oc whoami -c"
+    ocLogin()
     sh "oc status"
+    ocLogout()
 }
+
 
 def helmLint(String chart_dir) {
     // lint helm chart
@@ -24,10 +30,12 @@ def helmLint(String chart_dir) {
 
 def helmConfig() {
     //setup helm connectivity to Kubernetes API and Tiller
-    // println "initiliazing helm client"
-    // sh "helm init"
+    ocLogin()
+    println "initiliazing helm client"
+    sh "helm init --client-only"
     println "checking client/server version"
-    sh "helm version"
+    sh "HELM_HOST=tiller.kube-system.svc:44134 helm version"
+    ocLogout()
 }
 
 

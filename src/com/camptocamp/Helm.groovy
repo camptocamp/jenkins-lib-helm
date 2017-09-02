@@ -1,11 +1,11 @@
 #!/usr/bin/groovy
 package com.camptocamp;
 
-def ocLogin() {
+def login() {
     sh "oc login --insecure-skip-tls-verify --token $HELM_TOKEN https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT"
 }
 
-def ocLogout() {
+def logout() {
     sh "oc logout"
     // remove config
     sh "rm -rf ~/.kube/config"

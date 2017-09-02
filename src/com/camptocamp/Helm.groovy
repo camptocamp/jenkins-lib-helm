@@ -11,8 +11,8 @@ def kubectlTest() {
 def ocTest() {
     // Test that oc can correctly communication with the openshift API
     println "checking oc connnectivity to the API"
+    sh "oc whoami -c"
     sh "oc status"
-
 }
 
 def helmLint(String chart_dir) {

@@ -2,7 +2,6 @@
 package com.camptocamp;
 
 def ocLogin() {
-    println "using helm as user $HELM_USER"
     sh "oc login --insecure-skip-tls-verify --token $HELM_TOKEN https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT"
 }
 
@@ -15,9 +14,7 @@ def ocLogout() {
 def ocTest() {
     // Test that oc can correctly communication with the openshift API
     println "checking oc connnectivity to the API"
-    ocLogin()
     sh "oc status"
-    ocLogout()
 }
 
 
@@ -30,12 +27,10 @@ def helmLint(String chart_dir) {
 
 def helmConfig() {
     //setup helm connectivity to Kubernetes API and Tiller
-    ocLogin()
     println "initiliazing helm client"
     sh "helm init --client-only"
     println "checking client/server version"
     sh "helm version"
-    ocLogout()
 }
 
 

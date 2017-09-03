@@ -54,8 +54,7 @@ def helmDeploy(Map args) {
     } else {
         println "Running deployment"
 
-        // reimplement --wait once it works reliable
-        sh "helm upgrade --install ${args.name} ${args.chart_dir} --set imageTag=${args.version_tag},replicas=${args.replicas} --namespace=${namespace}"
+        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} --set imageTag=${args.version_tag},replicas=${args.replicas} --namespace=${namespace}"
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }

@@ -57,9 +57,6 @@ def helmDeploy(Map args) {
         // reimplement --wait once it works reliable
         sh "helm upgrade --install ${args.name} ${args.chart_dir} --set imageTag=${args.version_tag},replicas=${args.replicas} --namespace=${namespace}"
 
-        // sleeping until --wait works reliably
-        sleep(20)
-
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
 }

@@ -93,7 +93,7 @@ def gitEnvVars() {
     }
     println "env.GIT_REMOTE_URL ==> ${env.GIT_REMOTE_URL}"
 
-    sh 'git rev-parse --abbrev-ref HEAD> git_branch.txt'
+    sh 'git branch | sed -n -e 's/^\* \(.*\)/\1/p'> git_branch.txt'
     try {
         env.GIT_BRANCH = readFile('git_branch.txt').trim()
     } catch (e) {
@@ -101,7 +101,6 @@ def gitEnvVars() {
     }
     println "env.GIT_BRANCH ==> ${env.GIT_BRANCH}"
 }
-
 
 def containerBuildPub(Map args) {
 

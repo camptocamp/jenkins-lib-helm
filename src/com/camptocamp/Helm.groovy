@@ -93,7 +93,7 @@ def gitEnvVars() {
     }
     println "env.GIT_REMOTE_URL ==> ${env.GIT_REMOTE_URL}"
 
-    sh 'git branch | sed -n -e 's/^\* \(.*\)/\1/p'> git_branch.txt'
+    sh 'git symbolic-ref --short HEAD> git_branch.txt'
     try {
         env.GIT_BRANCH = readFile('git_branch.txt').trim()
     } catch (e) {

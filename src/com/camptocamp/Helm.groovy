@@ -92,6 +92,14 @@ def gitEnvVars() {
         error "${e}"
     }
     println "env.GIT_REMOTE_URL ==> ${env.GIT_REMOTE_URL}"
+
+    sh 'git rev-parse --abbrev-ref HEAD> git_branch.txt'
+    try {
+        env.GIT_BRANCH = readFile('git_branch.txt').trim()
+    } catch (e) {
+        error "${e}"
+    }
+    println "env.GIT_BRANCH ==> ${env.GIT_BRANCH}"
 }
 
 

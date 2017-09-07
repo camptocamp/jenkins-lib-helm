@@ -47,14 +47,24 @@ def helmDeploy(Map args) {
         namespace = args.namespace
     }
 
+    def values_map = []
+    def String values
+
+    if (args.containsKey("values")) {
+        for ( item in args.values ) {
+            values_map.add("$item.key=$item.value")
+        }
+        values = "--set ${values_map.join(',')}"
+    }
+
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} --set imageTag=${args.version_tag},replicas=${args.replicas} --namespace=${namespace}"
+        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace}"
     } else {
         println "Running deployment"
 
-        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} --set imageTag=${args.version_tag},replicas=${args.replicas} --namespace=${namespace}"
+        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace}"
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }

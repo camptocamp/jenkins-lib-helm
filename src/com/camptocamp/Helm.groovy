@@ -94,22 +94,6 @@ def gitEnvVars() {
         error "${e}"
     }
     println "env.GIT_COMMIT_ID ==> ${env.GIT_COMMIT_ID}"
-
-    sh 'git config --get remote.origin.url> git_remote_origin_url.txt'
-    try {
-        env.GIT_REMOTE_URL = readFile('git_remote_origin_url.txt').trim()
-    } catch (e) {
-        error "${e}"
-    }
-    println "env.GIT_REMOTE_URL ==> ${env.GIT_REMOTE_URL}"
-
-    sh 'git name-rev --name-only HEAD> git_branch.txt'
-    try {
-        env.GIT_BRANCH = readFile('git_branch.txt').trim()
-    } catch (e) {
-        error "${e}"
-    }
-    println "env.GIT_BRANCH ==> ${env.GIT_BRANCH}"
 }
 
 def containerBuildPub(Map args) {

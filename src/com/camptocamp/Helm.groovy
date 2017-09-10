@@ -11,6 +11,29 @@ def logout() {
     sh "rm -rf ~/.kube/config"
 }
 
+def helmNamespace(Map args) {
+    def String namespace
+
+    // If namespace isn't parsed into the function set the namespace to the name
+    if (args.namespace == null) {
+        namespace = args.name
+    } else {
+        namespace = args.namespace
+    }
+    return namespace  
+}
+
+def helmTillerNamespace(Map args) {
+    def String tiller_namespace
+    // If tiller_namespace isn't parsed into the function set the tiller_namespace to kube-system
+    if (args.tiller_namespace == null) {
+        tiller_namespace = "kube-system"
+    } else {
+        tiller_namespace = args.tiller_namespace
+    }
+    return tiller_namespace     
+}
+
 def ocTest() {
     // Test that oc can correctly communication with the openshift API
     println "checking oc connnectivity to the API"
@@ -38,25 +61,11 @@ def helmDeploy(Map args) {
     //configure helm client and confirm tiller process is installed
     helmConfig()
 
-    def String namespace
-    def String tiller_namespace
-
-    // If namespace isn't parsed into the function set the namespace to the name
-    if (args.namespace == null) {
-        namespace = args.name
-    } else {
-        namespace = args.namespace
-    }
-    
-    // If tiller_namespace isn't parsed into the function set the tiller_namespace to kube-system
-    if (args.tiller_namespace == null) {
-        tiller_namespace = "kube-system"
-    } else {
-        tiller_namespace = args.tiller_namespace
-    }
-
     def values_map = []
     def String values
+
+    def namespace = helmNamespace(args)
+    def tiller_namespace = helmTillerNamespace(args)
 
     if (args.containsKey("values")) {
         for ( item in args.values ) {
@@ -79,14 +88,16 @@ def helmDeploy(Map args) {
 }
 
 def helmDelete(Map args) {
+        def namespace = helmNamespace(args)
+        def tiller_namespace = helmTillerNamespace(args)
         println "Running helm delete ${args.name}"
-
         sh "helm delete ${args.name} --tiller-namespace=${tiller_namespace}"
 }
 
 def helmTest(Map args) {
+    def namespace = helmNamespace(args)
+    def tiller_namespace = helmTillerNamespace(args)
     println "Running Helm test"
-
     sh "helm test ${args.name} --cleanup --tiller-namespace=${tiller_namespace}"
 }
 

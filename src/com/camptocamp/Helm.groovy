@@ -113,6 +113,12 @@ def gitEnvVars() {
         error "${e}"
     }
     println "env.GIT_COMMIT_ID ==> ${env.GIT_COMMIT_ID}"
+
+    // workaround missing branch name in env
+    def jobName = env.JOB_NAME
+    def branch = jobName.tokenize( '-' ).last()
+    env.BRANCH = branch
+    println "env.BRANCH ==> ${branch}"
 }
 
 def containerBuildPub(Map args) {

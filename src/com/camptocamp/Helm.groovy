@@ -39,12 +39,20 @@ def helmDeploy(Map args) {
     helmConfig()
 
     def String namespace
+    def String tiller-namespace
 
     // If namespace isn't parsed into the function set the namespace to the name
     if (args.namespace == null) {
         namespace = args.name
     } else {
         namespace = args.namespace
+    }
+    
+    // If tiller-namespace isn't parsed into the function set the tiller-namespace to kube-system
+    if (args.tiller-namespace == null) {
+        tiller-namespace = "kube-system"
+    } else {
+        tiller-namespace = args.tiller-namespace
     }
 
     def values_map = []
@@ -60,26 +68,26 @@ def helmDeploy(Map args) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace}"
+        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace} --tiller-namespace=${tiller-namespace}"
     } else {
         println "Running deployment"
 
-        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace}"
+        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace} --tiller-namespace=${tiller-namespace}"
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
 }
 
 def helmDelete(Map args) {
-        println "Running helm delete ${args.name}"
+        println "Running helm delete ${args.name} --tiller-namespace=${tiller-namespace}"
 
-        sh "helm delete ${args.name}"
+        sh "helm delete ${args.name} --tiller-namespace=${tiller-namespace}"
 }
 
 def helmTest(Map args) {
     println "Running Helm test"
 
-    sh "helm test ${args.name} --cleanup"
+    sh "helm test ${args.name} --cleanup --tiller-namespace=${tiller-namespace}"
 }
 
 def gitEnvVars() {

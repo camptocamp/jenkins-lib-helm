@@ -68,26 +68,26 @@ def helmDeploy(Map args) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace} --tiller_namespace=${tiller_namespace}"
+        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace} --tiller-namespace=${tiller_namespace}"
     } else {
         println "Running deployment"
 
-        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace} --tiller_namespace=${tiller_namespace}"
+        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace} --tiller-namespace=${tiller_namespace}"
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
 }
 
 def helmDelete(Map args) {
-        println "Running helm delete ${args.name} --tiller_namespace=${tiller_namespace}"
+        println "Running helm delete ${args.name}"
 
-        sh "helm delete ${args.name} --tiller_namespace=${tiller_namespace}"
+        sh "helm delete ${args.name} --tiller-namespace=${tiller_namespace}"
 }
 
 def helmTest(Map args) {
     println "Running Helm test"
 
-    sh "helm test ${args.name} --cleanup --tiller_namespace=${tiller_namespace}"
+    sh "helm test ${args.name} --cleanup --tiller-namespace=${tiller_namespace}"
 }
 
 def gitEnvVars() {

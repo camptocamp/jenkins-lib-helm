@@ -69,8 +69,9 @@ def helmDeploy(Map args) {
 
     if (args.containsKey("values")) {
         for ( item in args.values ) {
-            values_map.add("$item.key='$item.value'")
+            values_map.add($/$item.key=\\\"$item.value\\\"/$)
         }
+   
         values = "--set ${values_map.join(',')}"
     }
 

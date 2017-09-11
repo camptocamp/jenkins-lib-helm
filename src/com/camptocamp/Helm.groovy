@@ -63,9 +63,14 @@ def helmDeploy(Map args) {
 
     def values_map = []
     def String values
+    def String values_file
 
     def namespace = helmNamespace(args)
     def tiller_namespace = helmTillerNamespace(args)
+
+    if (args.containsKey("values_file")) {
+        values_file = "-f ${args.values_file}"
+    }
 
     if (args.containsKey("values")) {
         for ( item in args.values ) {
@@ -77,11 +82,11 @@ def helmDeploy(Map args) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace} --tiller-namespace=${tiller_namespace}"
+        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} ${values_file} ${values} --namespace=${namespace} --tiller-namespace=${tiller_namespace}"
     } else {
         println "Running deployment"
 
-        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} ${values} --namespace=${namespace} --tiller-namespace=${tiller_namespace}"
+        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} ${values_file} ${values} --namespace=${namespace} --tiller-namespace=${tiller_namespace}"
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }

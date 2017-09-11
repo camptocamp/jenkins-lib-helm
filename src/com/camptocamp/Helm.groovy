@@ -78,7 +78,7 @@ def helmDeploy(Map args) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh $/helm upgrade --dry-run --install ${args.name} ${args.chart_dir} $values --namespace=${namespace} --tiller-namespace=${tiller_namespace}$/
+        sh $/helm upgrade --dry-run --install ${args.name} ${args.chart_dir} $values --namespace=${namespace} --tiller-namespace=${tiller_namespace}/$
     } else {
         println "Running deployment"
 

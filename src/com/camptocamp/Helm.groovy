@@ -71,7 +71,7 @@ def helmDeploy(Map args) {
         for ( item in args.values ) {
             values_map.add("$item.key=$item.value")
         }
-        values = "--set ${values_map.join(', ')}"
+        values = "--set ${values_map.join(',')}"
     }
 
     if (args.dry_run) {

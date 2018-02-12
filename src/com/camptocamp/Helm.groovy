@@ -62,6 +62,8 @@ def helmDeploy(Map args) {
 
     if (args.containsKey("values_file")) {
         values_file = "-f ${args.values_file}"
+    } else {
+        values_file = ""
     }
 
     if (args.containsKey("values")) {
@@ -69,6 +71,8 @@ def helmDeploy(Map args) {
             values_map.add("$item.key=$item.value")
         }
         values = "--set ${values_map.join(',')}"
+    } else {
+        values = ""
     }
 
     if (args.dry_run) {

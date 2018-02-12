@@ -30,7 +30,6 @@ def helmLint(String chart_dir) {
     // lint helm chart
     println "running helm lint ${chart_dir}"
     sh "helm lint ${chart_dir}"
-
 }
 
 def helmVersion() {
@@ -39,7 +38,7 @@ def helmVersion() {
     sh "helm version"
 }
 
-def helmConfig() {
+def helmConfig(Map args) {
     // setup helm connectivity to Kubernetes API and Tiller
     def tiller_namespace = helmTillerNamespace(args)
     println "initiliazing helm client"
@@ -48,7 +47,6 @@ def helmConfig() {
 }
 
 def helmDeploy(Map args) {
-
     def values_map = []
     def String values
     def String values_file
@@ -57,7 +55,7 @@ def helmDeploy(Map args) {
     def tiller_namespace = helmTillerNamespace(args)
 
     // configure helm client
-    helmConfig()
+    helmConfig(args)
 
     // confirm tiller process is installed
     helmVersion()

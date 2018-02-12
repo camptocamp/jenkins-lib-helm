@@ -1,16 +1,6 @@
 #!/usr/bin/groovy
 package com.camptocamp;
 
-def login() {
-    sh "oc login --insecure-skip-tls-verify --token $HELM_TOKEN https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT"
-}
-
-def logout() {
-    sh "oc logout"
-    // remove config
-    sh "rm -rf ~/.kube/config"
-}
-
 def helmNamespace(Map args) {
     def String namespace
 
@@ -36,13 +26,6 @@ def helmTillerNamespace(Map args) {
     return tiller_namespace     
 }
 
-def ocTest() {
-    // Test that oc can correctly communication with the openshift API
-    println "checking oc connnectivity to the API"
-    sh "oc status"
-}
-
-
 def helmLint(String chart_dir) {
     // lint helm chart
     println "running helm lint ${chart_dir}"
@@ -50,18 +33,21 @@ def helmLint(String chart_dir) {
 
 }
 
-def helmConfig() {
-    //setup helm connectivity to Kubernetes API and Tiller
-    println "initiliazing helm client"
-    sh "helm init --client-only"
+def helmVersion() {
+    // show versions
     println "checking client/server version"
     sh "helm version"
 }
 
+def helmConfig() {
+    // setup helm connectivity to Kubernetes API and Tiller
+    def tiller_namespace = helmTillerNamespace(args)
+    println "initiliazing helm client"
+    sh "helm init --client-only"
+    sh "export TILLER_NAMESPACE=${tiller_namespace}"
+}
 
 def helmDeploy(Map args) {
-    //configure helm client and confirm tiller process is installed
-    helmConfig()
 
     def values_map = []
     def String values
@@ -69,6 +55,12 @@ def helmDeploy(Map args) {
 
     def namespace = helmNamespace(args)
     def tiller_namespace = helmTillerNamespace(args)
+
+    // configure helm client
+    helmConfig()
+
+    // confirm tiller process is installed
+    helmVersion()
 
     if (args.containsKey("values_file")) {
         values_file = "-f ${args.values_file}"
@@ -95,10 +87,10 @@ def helmDeploy(Map args) {
 }
 
 def helmDelete(Map args) {
-        def namespace = helmNamespace(args)
-        def tiller_namespace = helmTillerNamespace(args)
-        println "Running helm delete ${args.name}"
-        sh "helm delete ${args.name} --tiller-namespace=${tiller_namespace}"
+    def namespace = helmNamespace(args)
+    def tiller_namespace = helmTillerNamespace(args)
+    println "Running helm delete ${args.name}"
+    sh "helm delete ${args.name} --tiller-namespace=${tiller_namespace}"
 }
 
 def helmTest(Map args) {

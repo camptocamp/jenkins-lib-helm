@@ -20,6 +20,7 @@ def helmNamespace(Map args) {
     } else {
         namespace = args.namespace
     }
+    println "using helm namespace '${namespace}'"
     return namespace  
 }
 
@@ -31,6 +32,7 @@ def helmTillerNamespace(Map args) {
     } else {
         tiller_namespace = args.tiller_namespace
     }
+    println "using helm namespace '${tiller_namespace}'"
     return tiller_namespace     
 }
 

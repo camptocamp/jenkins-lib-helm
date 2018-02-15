@@ -111,7 +111,7 @@ def addDependencyRepos(Map args) {
 
         deps['dependencies'].eachWithIndex { dep, index ->
             println "alias: repo${index}"
-            println "repository: dep['repository']"
+            println "repository: ${dep['repository']}"
         }
 
     }

@@ -104,6 +104,7 @@ def helmTest(Map args) {
 
 def addDependenciesRepo(Map args) {
     def depsFile = "${args.chart_dir}/requirements.yaml"
+    def deps = [:]
     if (fileExists(depsFile)) {
         deps = readYaml file: "${args.chart_dir}/requirements.yaml"
         println "deps ==> ${deps}"

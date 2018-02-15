@@ -102,6 +102,20 @@ def helmTest(Map args) {
     sh "helm test ${args.name} --cleanup --tiller-namespace=${tiller_namespace}"
 }
 
+def helmUpdateDependencies(Map args) {
+    def namespace = helmNamespace(args)
+    def tiller_namespace = helmTillerNamespace(args)
+    println "Updating Helm dependencies"
+    sh "helm dependency update ${args.name} --tiller-namespace=${tiller_namespace}"
+}
+
+def helmListDependencies(Map args) {
+    def namespace = helmNamespace(args)
+    def tiller_namespace = helmTillerNamespace(args)
+    println "Updating Helm dependencies"
+    sh "helm dependency list ${args.name} --tiller-namespace=${tiller_namespace}"
+}
+
 def gitEnvVars() {
     // create git envvars
     println "Setting envvars to tag container"

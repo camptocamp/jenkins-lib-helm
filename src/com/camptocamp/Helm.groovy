@@ -110,7 +110,7 @@ def addDependencyRepos(Map args) {
         def deps = readYaml file: "${args.chart_dir}/requirements.yaml"
         def repos = []
         deps['dependencies'].eachWithIndex { dep, index ->
-            if (!repos.includes(dep['repository'])) {
+            if (!repos.contains(dep['repository'])) {
                 helmAddRepo(
                     name        : repository_${index},
                     repository  : dep['repository']

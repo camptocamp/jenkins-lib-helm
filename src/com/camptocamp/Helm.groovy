@@ -112,7 +112,7 @@ def addDependencyRepos(Map args) {
         deps['dependencies'].eachWithIndex { dep, index ->
             if (!repos.contains(dep['repository'])) {
                 helmAddRepo(
-                    name        : repository_${index},
+                    name        : "repository_${index}",
                     repository  : dep['repository']
                 )
             }

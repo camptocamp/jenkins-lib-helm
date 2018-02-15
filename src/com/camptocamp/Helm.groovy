@@ -103,33 +103,38 @@ def helmTest(Map args) {
 }
 
 def addDependencyRepos(Map args) {
+    // dynamically add helm repository based on the requirements.yaml file
+    // because the repo has to exist for dependencies update
     def depsFile = "${args.chart_dir}/requirements.yaml"
-    def deps = [:]
     if (fileExists(depsFile)) {
-        deps = readYaml file: "${args.chart_dir}/requirements.yaml"
-        println "deps ==> ${deps}"
-
+        def deps = readYaml file: "${args.chart_dir}/requirements.yaml"
+        def repos = []
         deps['dependencies'].eachWithIndex { dep, index ->
-            println "alias: repo${index}"
-            println "repository: ${dep['repository']}"
+            if repos.includes(dep['repository']) {
+                helmAddRepo(
+                    name        : repository_${index},
+                    repository  : dep['repository']
+                )
+            }
+            repos.add(dep.repository)
         }
-
     }
+}
+
+def helmAddRepo(Map args) {
+    println "Adding repository ${args.name} -> ${args.repository}"
+    sh "helm repo add ${args.name} ${args.repository}"
 }
 
 def helmUpdateDependencies(Map args) {
     addDependencyRepos(args)
-    def namespace = helmNamespace(args)
-    def tiller_namespace = helmTillerNamespace(args)
     println "Updating Helm dependencies"
-    sh "helm dependency update ${args.chart_dir} --tiller-namespace=${tiller_namespace}"
+    sh "helm dependency update ${args.chart_dir}"
 }
 
 def helmListDependencies(Map args) {
-    def namespace = helmNamespace(args)
-    def tiller_namespace = helmTillerNamespace(args)
     println "Updating Helm dependencies"
-    sh "helm dependency list ${args.chart_dir} --tiller-namespace=${tiller_namespace}"
+    sh "helm dependency list ${args.chart_dir}"
 }
 
 def gitEnvVars() {

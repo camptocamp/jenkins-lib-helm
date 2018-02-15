@@ -102,7 +102,16 @@ def helmTest(Map args) {
     sh "helm test ${args.name} --cleanup --tiller-namespace=${tiller_namespace}"
 }
 
+def addDependenciesRepo(Map args) {
+    def depsFile = "${args.chart_dir}/requirements.yaml"
+    if (fileExists(depsFile)) {
+        deps = readYaml file: "${args.chart_dir}/requirements.yaml"
+        println "deps ==> ${deps}"
+    }
+}
+
 def helmUpdateDependencies(Map args) {
+    addDependenciesRepo(args)
     def namespace = helmNamespace(args)
     def tiller_namespace = helmTillerNamespace(args)
     println "Updating Helm dependencies"

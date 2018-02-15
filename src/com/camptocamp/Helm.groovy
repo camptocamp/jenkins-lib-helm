@@ -111,7 +111,7 @@ def addDependenciesRepo(Map args) {
 }
 
 def helmUpdateDependencies(Map args) {
-    addDependenciesRepo(args)
+    // addDependenciesRepo(args)
     def namespace = helmNamespace(args)
     def tiller_namespace = helmTillerNamespace(args)
     println "Updating Helm dependencies"

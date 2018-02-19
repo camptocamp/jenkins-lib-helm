@@ -82,7 +82,7 @@ def helmDeploy(Map args) {
     } else {
         println "Running deployment"
 
-        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} ${values_file} ${values} --namespace=${namespace} --tiller-namespace=${tiller_namespace}"
+        sh "helm upgrade --force --wait --install ${args.name} ${args.chart_dir} ${values_file} ${values} --namespace=${namespace} --tiller-namespace=${tiller_namespace}"
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }

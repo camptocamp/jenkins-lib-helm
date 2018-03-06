@@ -66,7 +66,6 @@ public void helmTemplate(config=[:], body) {
         
 
     ){
-        def envMap = getEnvMap()
         body()
     }
 }

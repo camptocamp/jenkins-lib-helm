@@ -32,7 +32,7 @@ public void hieraTemplate(config=[:], body) {
 
 public void helmTemplate(config=[:], body) {
 
-    def envVars = [:]
+    def envVars = []
     if (config.containsKey('secrets')){
         envVars = getEnvVars(config.secrets)
     }

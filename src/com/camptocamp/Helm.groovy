@@ -45,6 +45,16 @@ public void helmTemplate(config=[:], body) {
         )
     ]
 
+    for secret in config.secrets {
+        enVars.add(
+            secretEnvVar(
+                key: secret.key,
+                secretName: secret.secretName,
+                secretKey: secret.secretKey
+            )
+        )
+    }
+
     podTemplate(
         name: 'helm',
         label: 'helm',

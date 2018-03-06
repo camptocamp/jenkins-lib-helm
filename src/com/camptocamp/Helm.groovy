@@ -2,6 +2,11 @@
 package com.camptocamp;
 
 public void hieraTemplate(config=[:], body) {
+    def envVars = [:]
+    if (config.containsKey('secrets')){
+        envVars = getEnvVars(config.secrets)
+    }
+
     podTemplate(
         name: 'hiera',
         label: 'hiera',
@@ -17,16 +22,7 @@ public void hieraTemplate(config=[:], body) {
                 alwaysPullImage: true,
                 workingDir: '/tmp',
                 args: '${computer.jnlpmac} ${computer.name}',
-                envVars: [
-                    envVar(
-                        key: 'JAVA_GC_OPTS',
-                        value: '-XX:+UseParallelGC -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=2g'
-                    ),
-                    secretEnvVar(
-                        key: config['key'],
-                        secretName: config['secretName'],
-                        secretKey: config['secretKey']
-                    ),
+                envVars: envVars,
                 ]
             )
         ]
@@ -38,21 +34,9 @@ public void hieraTemplate(config=[:], body) {
 
 public void helmTemplate(config=[:], body) {
 
-    def envVars = [
-        envVar(
-            key: 'JAVA_GC_OPTS',
-            value: '-XX:+UseParallelGC -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=2g'
-        )
-    ]
-
-    for (secret in config.secrets) {
-        envVars.add(
-            secretEnvVar(
-                key: secret.key,
-                secretName: secret.secretName,
-                secretKey: secret.secretKey
-            )
-        )
+    def envVars = [:]
+    if (config.containsKey('secrets')){
+        envVars = getEnvVars(config.secrets)
     }
 
     podTemplate(
@@ -70,14 +54,32 @@ public void helmTemplate(config=[:], body) {
                 alwaysPullImage: true,
                 workingDir: '/tmp',
                 args: '${computer.jnlpmac} ${computer.name}',
-                envVars: envVars
+                envVars: envVars,
             )
-        ],
-        
-
+        ],        
     ){
         body()
     }
+}
+
+def getEnvVars(secrets){
+    def envVars = [
+        envVar(
+            key: 'JAVA_GC_OPTS',
+            value: '-XX:+UseParallelGC -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=2g'
+        )
+    ]
+
+    for (secret in secrets) {
+        envVars.add(
+            secretEnvVar(
+                key: secret.key,
+                secretName: secret.secretName,
+                secretKey: secret.secretKey
+            )
+        )
+    }
+    return enVars
 }
 
 def getEnvMap(){

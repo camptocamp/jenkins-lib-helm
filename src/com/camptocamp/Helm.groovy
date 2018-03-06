@@ -37,6 +37,14 @@ public void hieraTemplate(config=[:], body) {
 }
 
 public void helmTemplate(config=[:], body) {
+
+    def envVars = [
+        envVar(
+            key: 'JAVA_GC_OPTS',
+            value: '-XX:+UseParallelGC -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=2g'
+        )
+    ]
+
     podTemplate(
         name: 'helm',
         label: 'helm',
@@ -45,29 +53,20 @@ public void helmTemplate(config=[:], body) {
         containers: [
             containerTemplate(
                 name: 'jnlp',
-                image: "docker-registry.default.svc:5000/${env['namespace_prefix']}-cicd/jenkins-slave-helm:latest",
+                image: "docker-registry.default.svc:5000/${config['namespace_prefix']}-cicd/jenkins-slave-helm:latest",
                 ttyEnabled: true,
                 command: '',
                 privileged: false,
                 alwaysPullImage: true,
                 workingDir: '/tmp',
                 args: '${computer.jnlpmac} ${computer.name}',
-                envVars: [
-                    envVar(
-                        key: 'JAVA_GC_OPTS',
-                        value: '-XX:+UseParallelGC -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=2g'
-                    ),
-                    secretEnvVar(
-                        key: config['key'],
-                        secretName: config['secretName'],
-                        secretKey: config['secretKey']
-                    ),
-                ]
+                envVars: envVars
             )
         ],
         
 
     ){
+        def envMap = getEnvMap()
         body()
     }
 }

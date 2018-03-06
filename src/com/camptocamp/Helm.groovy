@@ -45,7 +45,7 @@ public void helmTemplate(config=[:], body) {
         containers: [
             containerTemplate(
                 name: 'jnlp',
-                image: "docker-registry.default.svc:5000/${config['namespace_prefix']}-cicd/jenkins-slave-helm:latest",
+                image: "docker-registry.default.svc:5000/${env['namespace_prefix']}-cicd/jenkins-slave-helm:latest",
                 ttyEnabled: true,
                 command: '',
                 privileged: false,
@@ -71,6 +71,23 @@ public void helmTemplate(config=[:], body) {
         body()
     }
 }
+
+def getEnvMap(){
+    bashEnvs = sh (
+    script: 'env | sort',
+    returnStdout: true
+    ).split("\n")
+
+    envMap = [:]
+
+    for ( bashEnv in bashEnvs ) {
+      bashEnvMap = bashEnv.split("=")
+      envMap.put(bashEnvMap[0].trim(), bashEnvMap[1].trim())
+    }
+
+    return envMap
+}
+
 
 /** @return The tag name, or `null` if the current commit isn't a tag. */
 String gitTagName() {

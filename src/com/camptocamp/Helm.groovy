@@ -23,10 +23,8 @@ public void hieraTemplate(config=[:], body) {
                 workingDir: '/tmp',
                 args: '${computer.jnlpmac} ${computer.name}',
                 envVars: envVars,
-                ]
             )
-        ]
-
+        ],
     ){
         body()
     }

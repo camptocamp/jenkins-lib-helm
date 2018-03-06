@@ -1,34 +1,34 @@
 #!/usr/bin/groovy
 package com.camptocamp;
 
-public void hieraTemplate(config=[:], body) {
-    def envVars = []
-    if (config.containsKey('secrets')){
-        envVars = getEnvVars(config.secrets)
-    }
+// public void hieraTemplate(config=[:], body) {
+//     def envVars = []
+//     if (config.containsKey('secrets')){
+//         envVars = getEnvVars(config.secrets)
+//     }
 
-    podTemplate(
-        name: 'hiera',
-        label: 'hiera',
-        cloud: 'openshift',
-        serviceAccount: 'jenkins',
-        containers: [
-            containerTemplate(
-                name: 'jnlp',
-                image: "docker-registry.default.svc:5000/${env.NAMESPACE_PREFIX}-cicd/jenkins-slave-hiera:latest",
-                ttyEnabled: true,
-                command: '',
-                privileged: false,
-                alwaysPullImage: true,
-                workingDir: '/tmp',
-                args: '${computer.jnlpmac} ${computer.name}',
-                envVars: envVars,
-            )
-        ],
-    ){
-        body()
-    }
-}
+//     podTemplate(
+//         name: 'hiera',
+//         label: 'hiera',
+//         cloud: 'openshift',
+//         serviceAccount: 'jenkins',
+//         containers: [
+//             containerTemplate(
+//                 name: 'jnlp',
+//                 image: "docker-registry.default.svc:5000/${env.NAMESPACE_PREFIX}-cicd/jenkins-slave-hiera:latest",
+//                 ttyEnabled: true,
+//                 command: '',
+//                 privileged: false,
+//                 alwaysPullImage: true,
+//                 workingDir: '/tmp',
+//                 args: '${computer.jnlpmac} ${computer.name}',
+//                 envVars: envVars,
+//             )
+//         ],
+//     ){
+//         body()
+//     }
+// }
 
 public void helmTemplate(config=[:], body) {
 
@@ -92,6 +92,7 @@ def getEnvMap(){
 
     for ( bashEnv in bashEnvs ) {
       bashEnvMap = bashEnv.split("=")
+      println "---> ${bashEnv[0]} --> ${bashEnv[1]}"
       envMap.put(bashEnvMap[0].trim(), bashEnvMap[1].trim())
     }
 

@@ -77,7 +77,7 @@ def getEnvVars(secrets){
             )
         )
     }
-    return enVars
+    return envVars
 }
 
 def getEnvMap(){

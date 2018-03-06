@@ -39,8 +39,8 @@ public void helmTemplate(config=[:], body) {
 
     def label = "helm-worker"
     podTemplate(
-        name: 'jnlp',
-        label: label,
+        name: 'helm-worker',
+        label: 'helm-worker',
         cloud: 'openshift',
         serviceAccount: 'jenkins',
         containers: [
@@ -89,13 +89,13 @@ def getEnvMap(){
     returnStdout: true
     ).split("\n")
 
-    println "bashEnv -> ${bashEnvs}"
+    println "bashEnv -> ${bashEnv}"
 
     envMap = [:]
 
     for ( bashEnv in bashEnvs ) {
       bashEnvMap = bashEnv.split("=")
-      println "---> ${bashEnv[0]} --> ${bashEnv[1]}"
+      println "---> ${bashEnvMap[0]} --> ${bashEnvMap[1]}"
       envMap.put(bashEnvMap[0].trim(), bashEnvMap[1].trim())
     }
 

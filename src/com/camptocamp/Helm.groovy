@@ -1,6 +1,54 @@
 #!/usr/bin/groovy
 package com.camptocamp;
 
+public void hieraTemplate(body) {
+    podTemplate(
+        name: 'hiera',
+        label: 'hiera',
+        cloud: 'openshift',
+        serviceAccount: 'jenkins',
+        containers: [
+            containerTemplate(
+                name: 'jnlp',
+                image: "docker-registry.default.svc:5000/${namespace_prefix}-cicd/jenkins-slave-hiera:latest",
+                ttyEnabled: true,
+                command: '',
+                privileged: false,
+                alwaysPullImage: true,
+                workingDir: '/tmp',
+                args: '${computer.jnlpmac} ${computer.name}',
+            )
+        ]
+
+    ){
+        body()
+    }
+}
+
+public void helmTemplate(body) {
+    podTemplate(
+        name: 'helm',
+        label: 'helm',
+        cloud: 'openshift',
+        serviceAccount: 'jenkins',
+        containers: [
+            containerTemplate(
+                name: 'jnlp',
+                image: "docker-registry.default.svc:5000/${namespace_prefix}-cicd/jenkins-slave-helm:latest",
+                ttyEnabled: true,
+                command: '',
+                privileged: false,
+                alwaysPullImage: true,
+                workingDir: '/tmp',
+                args: '${computer.jnlpmac} ${computer.name}',
+            )
+        ]
+
+    ){
+        body()
+    }
+}
+
 /** @return The tag name, or `null` if the current commit isn't a tag. */
 String gitTagName() {
     commit = getCommit()

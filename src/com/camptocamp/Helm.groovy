@@ -89,7 +89,7 @@ def getEnvMap(){
     returnStdout: true
     ).split("\n")
 
-    println "bashEnv -> ${bashEnv}"
+    println "bashEnv -> ${bashEnvs}"
 
     envMap = [:]
 

@@ -2,7 +2,7 @@
 package com.camptocamp;
 
 public void hieraTemplate(config=[:], body) {
-    def envVars = [:]
+    def envVars = []
     if (config.containsKey('secrets')){
         envVars = getEnvVars(config.secrets)
     }

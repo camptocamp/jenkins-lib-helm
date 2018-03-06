@@ -45,7 +45,7 @@ public void helmTemplate(config=[:], body) {
         )
     ]
 
-    for secret in config.secrets {
+    for (secret in config.secrets) {
         enVars.add(
             secretEnvVar(
                 key: secret.key,

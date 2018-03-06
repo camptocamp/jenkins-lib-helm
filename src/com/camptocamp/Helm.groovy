@@ -39,6 +39,7 @@ public void helmTemplate(config=[:], body) {
 
     def label = "helm-worker"
     podTemplate(
+        name: 'jnlp',
         label: label,
         cloud: 'openshift',
         serviceAccount: 'jenkins',

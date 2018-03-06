@@ -1,7 +1,7 @@
 #!/usr/bin/groovy
 package com.camptocamp;
 
-public void hieraTemplate(body, config={}) {
+public void hieraTemplate(config=[:], body) {
     podTemplate(
         name: 'hiera',
         label: 'hiera',
@@ -36,7 +36,7 @@ public void hieraTemplate(body, config={}) {
     }
 }
 
-public void helmTemplate(body, config={}) {
+public void helmTemplate(config=[:], body) {
     podTemplate(
         name: 'helm',
         label: 'helm',
@@ -45,7 +45,7 @@ public void helmTemplate(body, config={}) {
         containers: [
             containerTemplate(
                 name: 'jnlp',
-                image: "docker-registry.default.svc:5000/test-cicd/jenkins-slave-helm:latest",
+                image: "docker-registry.default.svc:5000/${config['namespace_prefix']}/jenkins-slave-helm:latest",
                 ttyEnabled: true,
                 command: '',
                 privileged: false,

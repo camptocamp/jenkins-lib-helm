@@ -45,7 +45,7 @@ public void helmTemplate(config=[:], body) {
         containers: [
             containerTemplate(
                 name: 'jnlp',
-                image: "docker-registry.default.svc:5000/${config['namespace_prefix']}/jenkins-slave-helm:latest",
+                image: "docker-registry.default.svc:5000/${config['namespace_prefix']}-cicd/jenkins-slave-helm:latest",
                 ttyEnabled: true,
                 command: '',
                 privileged: false,

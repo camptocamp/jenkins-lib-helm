@@ -1,7 +1,7 @@
 #!/usr/bin/groovy
 package com.camptocamp;
 
-public void hieraTemplate(body) {
+public void hieraTemplate(body, config={}) {
     podTemplate(
         name: 'hiera',
         label: 'hiera',
@@ -17,6 +17,17 @@ public void hieraTemplate(body) {
                 alwaysPullImage: true,
                 workingDir: '/tmp',
                 args: '${computer.jnlpmac} ${computer.name}',
+                envVars: [
+                    envVar(
+                        key: 'JAVA_GC_OPTS',
+                        value: '-XX:+UseParallelGC -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=2g'
+                    ),
+                    secretEnvVar(
+                        key: config['key'],
+                        secretName: config['secretName'],
+                        secretKey: config['secretKey']
+                    ),
+                ]
             )
         ]
 
@@ -25,7 +36,7 @@ public void hieraTemplate(body) {
     }
 }
 
-public void helmTemplate(body) {
+public void helmTemplate(body, config={}) {
     podTemplate(
         name: 'helm',
         label: 'helm',
@@ -41,8 +52,20 @@ public void helmTemplate(body) {
                 alwaysPullImage: true,
                 workingDir: '/tmp',
                 args: '${computer.jnlpmac} ${computer.name}',
+                envVars: [
+                    envVar(
+                        key: 'JAVA_GC_OPTS',
+                        value: '-XX:+UseParallelGC -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:MaxMetaspaceSize=2g'
+                    ),
+                    secretEnvVar(
+                        key: config['key'],
+                        secretName: config['secretName'],
+                        secretKey: config['secretKey']
+                    ),
+                ]
             )
-        ]
+        ],
+        
 
     ){
         body()

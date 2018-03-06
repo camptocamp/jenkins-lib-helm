@@ -88,6 +88,8 @@ def getEnvMap(){
     returnStdout: true
     ).split("\n")
 
+    println "bashEnv -> ${bashEnv}"
+
     envMap = [:]
 
     for ( bashEnv in bashEnvs ) {

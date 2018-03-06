@@ -37,24 +37,26 @@ public void helmTemplate(config=[:], body) {
         envVars = getEnvVars(config.secrets)
     }
 
+    def label = "helm-worker"
     podTemplate(
-        name: 'helm',
-        label: 'helm',
+        label: label,
         cloud: 'openshift',
         serviceAccount: 'jenkins',
         containers: [
             containerTemplate(
-                name: 'jnlp',
+                name: 'helm',
                 image: "docker-registry.default.svc:5000/${env.NAMESPACE_PREFIX}-cicd/jenkins-slave-helm:latest",
                 ttyEnabled: true,
-                command: '',
-                privileged: false,
-                alwaysPullImage: true,
-                workingDir: '/tmp',
-                args: '${computer.jnlpmac} ${computer.name}',
-                envVars: envVars,
+                command: 'cat',
+            ),
+            containerTemplate(
+                name: 'hiera',
+                image: "docker-registry.default.svc:5000/${env.NAMESPACE_PREFIX}-cicd/jenkins-slave-hiera:latest",
+                ttyEnabled: true,
+                command: 'cat',
             )
-        ],        
+        ],      
+        envVars: envVars,
     ){
         body()
     }

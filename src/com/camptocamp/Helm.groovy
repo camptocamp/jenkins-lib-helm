@@ -85,13 +85,11 @@ def getEnvVars(secrets){
 
 def getEnvMap(){
     bashEnvs = sh (
-    script: 'env | sort',
-    returnStdout: true
+        script: 'env | sort',
+        returnStdout: true
     ).split("\n")
 
-    println "bashEnv -> ${bashEnvs}"
-
-    envMap = [:]
+    envMap = []
 
     for ( bashEnv in bashEnvs ) {
       bashEnvMap = bashEnv.split("=")

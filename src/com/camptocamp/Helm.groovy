@@ -91,14 +91,11 @@ def getEnvMap(){
 
     envMap = [:]
 
-    println "bashEnvs -> ${bashEnvs}"
-
     for ( bashEnv in bashEnvs ) {
-        bashEnvMap = bashEnv.split("=")
-        println "bashEnv -> ${bashEnv}"
-        println "bashEnvMap -> ${bashEnvMap}"
-        //println "---> ${bashEnvMap[0]} --> ${bashEnvMap[1]}"
-        //envMap.put(bashEnvMap[0].trim(), bashEnvMap[1].trim())
+        if (bashEnv)
+            bashEnvMap = bashEnv.split("=")
+            envMap.put(bashEnvMap[0].trim(), bashEnvMap[1].trim())
+        }
     }
 
     return envMap

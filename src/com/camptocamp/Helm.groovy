@@ -92,7 +92,7 @@ def getEnvMap(){
     envMap = [:]
 
     for ( bashEnv in bashEnvs ) {
-        if (bashEnv)
+        if (bashEnv) {
             bashEnvMap = bashEnv.split("=")
             envMap.put(bashEnvMap[0].trim(), bashEnvMap[1].trim())
         }

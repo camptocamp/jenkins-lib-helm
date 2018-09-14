@@ -106,7 +106,7 @@ def getEnvMap(){
 String gitTagName() {
     commit = getCommit()
     if (commit) {
-        desc = sh(script: "git describe --tags ${commit}", returnStdout: true)?.trim()
+        desc = sh(script: "git describe --always --tags ${commit}", returnStdout: true)?.trim()
         if (isTag(desc)) {
             return desc
         }

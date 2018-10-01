@@ -30,6 +30,256 @@ package com.camptocamp;
 //     }
 // }
 
+public void pipeline(config=[:], body) {
+  properties([
+    gitLabConnection('Gitlab'),
+    pipelineTriggers([
+      [
+        $class: 'GitLabPushTrigger',
+        branchFilterType: 'All',
+        triggerOnPush: true,
+        triggerOnMergeRequest: false,
+        ciSkip: true,
+        // you can add your trigger secret token here, or edit the pipeline job to generate one
+        secretToken: gilab_secret_token
+      ]
+    ])
+  ])
+
+  podTemplate(
+    label: 'jenkins-slave',
+    cloud: 'openshift',
+    serviceAccount: 'jenkins',
+    containers: [
+      containerTemplate(
+        name: 'skopeo',
+        image: "docker-registry.default.svc:5000/${namespace_prefix}-cicd/skopeo-jenkins-slave:latest",
+        ttyEnabled: true,
+        command: 'cat',
+        alwaysPullImage: true,
+      ),
+    ],
+    imagePullSecrets: ['ftth-openshift-pull-secret'],
+  ){
+    node() {
+
+      // add bash environment variables
+      def ENV = [:]
+      def nodeEnvs = helm.getEnvMap()
+      nodeEnvs.each { key, value ->
+        ENV.put(key, value)
+      }
+      
+      def debug = false
+      def scmVars = checkout(scm)
+
+      // get branch & commit from scm   
+      ENV.GIT_BRANCH = scmVars.GIT_BRANCH
+      ENV.GIT_COMMIT_SHA = scmVars.GIT_COMMIT.substring(0, 7)
+
+      // get tags from library
+      ENV.GIT_TAG_NAME = helm.gitTagName()
+      ENV.GIT_TAG_MESSAGE = helm.gitTagMessage()
+
+      // tag image with version, and branch-commit_id
+      def dev_image_tag = "ref-${ENV.GIT_COMMIT_SHA}"
+      def version_tag = ENV.GIT_TAG_NAME
+
+      // Compute namespace & release name based on branch names
+      def namespace_postfix = 'cicd'
+      def release_name = "${release_base_name}"
+      def values_release_name = release_name
+      def image_tag = dev_image_tag
+
+      switch(ENV.GIT_BRANCH) {
+        case 'origin/master':
+          namespace_postfix = "dev"
+          break
+        case 'origin/int':
+          namespace_postfix = "int"
+          image_tag = version_tag
+          break
+        case 'origin/prd':
+          namespace_postfix = "prd"
+          image_tag = version_tag
+          break
+        default:
+          namespace_postfix = "dev"
+          release_name = "${release_base_name}-${dev_image_tag}"
+          break
+      }
+      def namespace = "${namespace_prefix}-${namespace_postfix}"
+
+      // Debug
+      if (debug) {
+
+        scm.each { name, value -> 
+          println "scm Name: $name -> Value $value"
+        }
+
+        scmVars.each { name, value -> 
+          println "scmVars Name: $name -> Value $value"
+        }
+        ENV.each { name, value -> 
+          println "ENV Name: $name -> Value $value"
+        }
+      }
+
+      echo "ENV.GIT_BRANCH:       ${ENV.GIT_BRANCH}"
+      echo "ENV.GIT_COMMIT_SHA:   ${ENV.GIT_COMMIT_SHA}"
+      echo "ENV.GIT_TAG_NAME:     ${ENV.GIT_TAG_NAME}"
+      echo "ENV.GIT_TAG_MESSAGE:  ${ENV.GIT_TAG_MESSAGE}"
+      echo "namespace:            ${namespace}"
+      echo "release_name:         ${release_name}"
+
+
+      def stage_description = "${image_tag} from ${ENV.GIT_BRANCH} to ${namespace} (TODO manually untill release management)"
+      // set stages to be synced with gitlab
+      // gitlabBuilds(builds: [
+      //   "build ${stage_description}",
+      //   "deploy ${stage_description}",
+      // ]) {
+        // Only build if not int or prd branch
+      if (!['origin/int','origin/prd'].contains(ENV.GIT_BRANCH)) {
+        stage("build ${stage_description}"){
+          // gitlabCommitStatus("build ${stage_description}") {
+            // Build on same commit 
+
+          openshiftBuild(
+            buildConfig: build_config_name,
+            commitID: ENV.GIT_COMMIT_SHA,
+            showBuildLogs: 'true',
+          )
+
+          // tag remote image
+          node('jenkins-slave'){
+            container('skopeo'){
+              withCredentials([usernameColonPassword(credentialsId: 'mtr-creds', variable: 'MTR_CREDS')]) {
+                sh """
+                  skopeo copy --src-creds ${MTR_CREDS} \
+                  --dest-creds ${MTR_CREDS} \
+                  docker://${registry}/${deploy_chart_name}:latest \
+                  docker://${registry}/${deploy_chart_name}:${dev_image_tag}
+                """
+              }
+            }
+          }
+
+          // Sync the pushed image with the imagestream
+          sh """
+            oc import-image ${deploy_chart_name} \
+            -n ${namespace_prefix}-cicd \
+            --from ${registry}/${deploy_chart_name} \
+            --all \
+            --confirm
+          """
+
+          // // Tag the last build with commit id
+          // openshiftTag(
+          //   srcStream: deploy_chart_name,
+          //   srcTag: 'latest',
+          //   destStream: deploy_chart_name,
+          //   destTag: dev_image_tag
+          // )
+          // check the im agestream references
+
+          sh """
+            oc describe is ${deploy_chart_name} -n ${namespace_prefix}-cicd
+          """
+        }
+        
+      } else {
+
+        stage("deploy ${stage_description}"){
+          // gitlabCommitStatus("deploy ${stage_description}") {
+
+          def Boolean promote
+          promote = false
+
+          if (['origin/prd'].contains(ENV.GIT_BRANCH)) {
+            try {
+              timeout(time: 7, unit: 'DAYS') {
+                promote = input message: 'Input Required',
+                parameters: [
+                  [ $class: 'BooleanParameterDefinition',
+                    defaultValue: true,
+                    description: "Check the box to deploy on Production",
+                    name: "deploy ${stage_description}"
+                  ]
+                ]
+              }
+            } catch (err) {
+              // don't promote => no error
+            }
+          } else {
+                      
+            // tag remote image
+            node('jenkins-slave'){
+              container('skopeo'){
+                withCredentials([string(credentialsId: 'mtr-creds', variable: 'MTR_CREDS')]) {
+                  sh """
+                    skopeo copy --src-creds ${MTR_CREDS} \
+                    --dest-creds ${MTR_CREDS} \
+                    docker://${registry}/${deploy_chart_name}:${dev_image_tag} \
+                    docker://${registry}/${deploy_chart_name}:${version_tag}
+                  """
+                }
+              }
+            }
+
+            // Sync the pushed image with the imagestream
+            sh """
+              oc import-image ${deploy_chart_name} \
+              -n ${namespace_prefix}-cicd \
+              --from ${registry}/${deploy_chart_name} \
+              --all \
+              --confirm
+            """
+
+            // check the imagestream references
+            sh """
+              oc describe is ${deploy_chart_name} -n ${namespace_prefix}-cicd
+            """
+
+          }
+        }
+      }
+
+      stage("deploy ${stage_description}"){
+        // gitlabCommitStatus("deploy ${stage_description}") {
+        echo """
+      # Manual deployment
+
+      # Set location where you cloned the helm-charts GIT repository with path to your chart
+      HELM_CHART_LOCATION=${helm_charts_location}
+
+      # Set location where you cloned the helm-values GIT repository with path to your values (do not include the environment)
+      HELM_VALUES_LOCATION=${helm_values_location}
+
+      # Install/Upgrade the deployment
+      helm upgrade ${release_name} \${HELM_CHART_LOCATION}/${deploy_chart_name} -i --tiller-namespace ${namespace} --namespace ${namespace} --set image.tag=${image_tag} -f \${HELM_VALUES_LOCATION}/${deploy_chart_name}/${cluster_name}/${namespace}/${values_release_name}/values.yaml
+
+        """
+        // }
+
+        if (!['origin/master'].contains(ENV.GIT_BRANCH)) {
+          // Delete deployment as tests passed
+          echo """"
+      # Once you're happy, you can delete the deployment of the feature branch with
+      helm delete ${release_name} --tiller-namespace ${namespace}
+
+      # If needed, the deleted feature branch release can be re-deployed with
+      helm rollback ${release_name} 1 --tiller-namespace ${namespace}
+            
+          """
+        }
+      }
+    }
+  }
+}
+
+    
+
 public void helmTemplate(config=[:], body) {
 
     def envVars = []
